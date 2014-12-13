@@ -2,7 +2,8 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
+build
+app/build
 # Package Files #
 *.jar
 *.war
