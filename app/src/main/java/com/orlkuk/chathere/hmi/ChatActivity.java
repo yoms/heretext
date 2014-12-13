@@ -1,190 +1,141 @@
 package com.orlkuk.chathere.hmi;
 
-import java.io.IOException;
+import android.app.Activity;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ContentValues;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.gcm.GcmUtil;
-import com.orlkuk.chathere.gcm.ServerUtilities;
 import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
-/**
- * @author appsrox.com
- *
- */
-public class ChatActivity extends Activity implements MessagesFragment.OnFragmentInteractionListener, EditContactDialog.OnFragmentInteractionListener {
 
-	private EditText msgEdit;
-	private Button sendBtn;
-	private String profileId;
-	private String profileName;
-	private String profileEmail;
+public class ChatActivity  extends FragmentActivity
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-	private GcmUtil gcmUtil;
+    /**
+     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     */
+    private NavigationDrawerFragment mNavigationDrawerFragment;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_chat);
-		
-		profileId = getIntent().getStringExtra(Common.PROFILE_ID);
-		msgEdit = (EditText) findViewById(R.id.msg_edit);
-		sendBtn = (Button) findViewById(R.id.send_btn);
-		
-		ActionBar actionBar = getActionBar();
-		actionBar.setHomeButtonEnabled(true);
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		
-		Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), null, null, null, null);
-		if (c.moveToFirst()) {
-			profileName = c.getString(c.getColumnIndex(DataProvider.COL_NAME));
-			profileEmail = c.getString(c.getColumnIndex(DataProvider.COL_EMAIL));
-			actionBar.setTitle(profileName);
-		}
-		actionBar.setSubtitle("connecting ...");
-		
-		registerReceiver(registrationStatusReceiver, new IntentFilter(Common.ACTION_REGISTER));
-		gcmUtil = new GcmUtil(getApplicationContext());
-	}
+    /**
+     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
+     */
+    private CharSequence mTitle;
+    private GoogleMap mMap;
+    private String mProfileName;
+    private String mProfileEmail;
+    private String profileId;
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.chat, menu);
-		return true;
-	}	
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_edit:
-			EditContactDialog dialog = new EditContactDialog();
-			Bundle args = new Bundle();
-			args.putString(Common.PROFILE_ID, profileId);
-			args.putString(DataProvider.COL_NAME, profileName);
-			dialog.setArguments(args);
-			dialog.show(getFragmentManager(), "EditContactDialog");
-			return true;
-			
-		case android.R.id.home:
-			Intent intent = new Intent(this, MainActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			return true;			
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
+        profileId = getIntent().getStringExtra(Common.PROFILE_ID);
 
-	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.send_btn:
-            Location currentLoc = Common.getCurrentLocation();
-            double lon = 0.0;
-            double lat = 0.0;
-            if(currentLoc != null){
-                lon = currentLoc.getLongitude();
-                lat = currentLoc.getLatitude();
+
+        Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), null, null, null, null);
+        if (c.moveToFirst()) {
+            mProfileName = c.getString(c.getColumnIndex(DataProvider.COL_NAME));
+            mProfileEmail = c.getString(c.getColumnIndex(DataProvider.COL_EMAIL));
+        }
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        setUpMapIfNeeded();
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            SupportMapFragment frag = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
+            if (frag != null) {
+                mMap = frag.getMap();
             }
-            send(msgEdit.getText().toString() , lat, lon);
-            msgEdit.setText(null);
-			break;
-		}
-	}
-	
-	@Override
-	public void onEditContact(String name) {
-		getActionBar().setTitle(name);
-	}	
-	
-	@Override
-	public String getProfileEmail() {
-		return profileEmail;
-	}	
-	
-	private void send(final String txt, final double latitude, final double longitude) {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    ServerUtilities.send(latitude, longitude, txt, profileEmail);
-                    
-        			ContentValues values = new ContentValues(2);
-                    values.put(DataProvider.COL_MSG, txt);
-                    values.put(DataProvider.COL_LAT, latitude);
-                    values.put(DataProvider.COL_LON, longitude);
-        			values.put(DataProvider.COL_TO, profileEmail);
-        			getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
-        			
-                } catch (IOException ex) {
-                    msg = "Message could not be sent";
-                }
-                return msg;
+        }
+    }
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+
+        // Check if we were successful in obtaining the map.
+        if (mMap != null) {
+            mMap.clear();
+
+            Cursor c = getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+            while( c.moveToNext())
+            {
+                double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
+                double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
+                String msg = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
+                mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg));
+
             }
+        }
+        Log.e(this.getLocalClassName(), "item " + position + " Selected");
+    }
 
-            @Override
-            protected void onPostExecute(String msg) {
-            	if (!TextUtils.isEmpty(msg)) {
-            		Toast.makeText(getApplicationContext(), msg + " " + String.valueOf(latitude) +" " + String.valueOf(longitude), Toast.LENGTH_LONG).show();
-            	}
-            }
-        }.execute(null, null, null);		
-	}	
+    public void restoreActionBar() {
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
+    }
 
-	@Override
-	protected void onPause() {
-		ContentValues values = new ContentValues(1);
-		values.put(DataProvider.COL_COUNT, 0);
-		getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), values, null, null);
-		super.onPause();
-	}
+    public String getProfileEmail() {
+        return mProfileEmail;
+    }
 
-	@Override
-	protected void onDestroy() {
-		unregisterReceiver(registrationStatusReceiver);
-		gcmUtil.cleanup();
-		super.onDestroy();
-	}
-	
-	//--------------------------------------------------------------------------------
-	
-	private BroadcastReceiver registrationStatusReceiver = new  BroadcastReceiver() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
+            getMenuInflater().inflate(R.menu.chat, menu);
+            restoreActionBar();
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
 
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent != null && Common.ACTION_REGISTER.equals(intent.getAction())) {
-				switch (intent.getIntExtra(Common.EXTRA_STATUS, 100)) {
-				case Common.STATUS_SUCCESS:
-					getActionBar().setSubtitle("online");
-					sendBtn.setEnabled(true);
-					break;
-					
-				case Common.STATUS_FAILED:
-					getActionBar().setSubtitle("offline");					
-					break;					
-				}
-			}
-		}
-	};
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
 }
