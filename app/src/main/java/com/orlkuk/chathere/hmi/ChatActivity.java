@@ -26,10 +26,16 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.orlkuk.chathere.R;
 import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class ChatActivity  extends FragmentActivity
@@ -48,12 +54,14 @@ public class ChatActivity  extends FragmentActivity
     private String mProfileName;
     private String mProfileEmail;
     private String profileId;
+    private Map<String, Marker> currentsMarkers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         profileId = getIntent().getStringExtra(Common.PROFILE_ID);
+        currentsMarkers = new HashMap<String, Marker>();
 
 
         Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), null, null, null, null);
@@ -78,6 +86,14 @@ public class ChatActivity  extends FragmentActivity
             SupportMapFragment frag = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
             if (frag != null) {
                 mMap = frag.getMap();
+                mMap.setOnMapLongClickListener( new GoogleMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        mMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .title("You are here"));
+                    }
+                });
             }
         }
     }
@@ -86,15 +102,25 @@ public class ChatActivity  extends FragmentActivity
 
         // Check if we were successful in obtaining the map.
         if (mMap != null) {
-            mMap.clear();
 
-            Cursor c = getContentResolver().query(DataProvider.CONTENT_URI_MESSAGES, null, null, null, null);
+            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, Common.getPreferredEmail()), null, null, null, null);
+            for(Marker mark : currentsMarkers.values())
+            {
+                mark.setVisible(false);
+            }
             while( c.moveToNext())
             {
                 double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
                 double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
                 String msg = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
-                mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg));
+                String markerId = c.getString(c.getColumnIndex(DataProvider.COL_ID));
+
+                if(currentsMarkers.containsKey(markerId)) {
+                    currentsMarkers.get(markerId).setVisible(true);
+                }
+                else {
+                    currentsMarkers.put(markerId, mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg)));
+                }
 
             }
         }

@@ -16,8 +16,9 @@ import android.net.Uri;
  *
  */
 public class DataProvider extends ContentProvider {
-	
-	public static final Uri CONTENT_URI_MESSAGES = Uri.parse("content://com.orlkuk.chathere.provider/messages");
+
+    public static final Uri CONTENT_URI_MESSAGES = Uri.parse("content://com.orlkuk.chathere.provider/messages");
+    public static final Uri CONTENT_URI_USER_MESSAGES = Uri.parse("content://com.orlkuk.chathere.provider/usermessages");
 	public static final Uri CONTENT_URI_PROFILE = Uri.parse("content://com.orlkuk.chathere.provider/profile");
 
 	public static final String COL_ID = "_id";
@@ -38,15 +39,17 @@ public class DataProvider extends ContentProvider {
 	private DbHelper dbHelper;
 	
 	private static final int MESSAGES_ALLROWS = 1;
-	private static final int MESSAGES_SINGLE_ROW = 2;
-	private static final int PROFILE_ALLROWS = 3;
-	private static final int PROFILE_SINGLE_ROW = 4;
+    private static final int MESSAGES_SINGLE_ROW = 2;
+    private static final int MESSAGES_FOR_USER = 3;
+	private static final int PROFILE_ALLROWS = 4;
+	private static final int PROFILE_SINGLE_ROW = 5;
 	
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("com.orlkuk.chathere.provider", "messages", MESSAGES_ALLROWS);
-		uriMatcher.addURI("com.orlkuk.chathere.provider", "messages/#", MESSAGES_SINGLE_ROW);
+        uriMatcher.addURI("com.orlkuk.chathere.provider", "messages/#", MESSAGES_SINGLE_ROW);
+        uriMatcher.addURI("com.orlkuk.chathere.provider", "usermessages/*", MESSAGES_FOR_USER);
 		uriMatcher.addURI("com.orlkuk.chathere.provider", "profile", PROFILE_ALLROWS);
 		uriMatcher.addURI("com.orlkuk.chathere.provider", "profile/#", PROFILE_SINGLE_ROW);
 	}
@@ -65,12 +68,17 @@ public class DataProvider extends ContentProvider {
 		switch(uriMatcher.match(uri)) {
 		case MESSAGES_ALLROWS:
 			qb.setTables(TABLE_MESSAGES);
-			break;			
-			
-		case MESSAGES_SINGLE_ROW:
-			qb.setTables(TABLE_MESSAGES);
-			qb.appendWhere("_id = " + uri.getLastPathSegment());
 			break;
+
+        case MESSAGES_SINGLE_ROW:
+            qb.setTables(TABLE_MESSAGES);
+            qb.appendWhere("_id = " + uri.getLastPathSegment());
+            break;
+
+        case MESSAGES_FOR_USER:
+            qb.setTables(TABLE_MESSAGES);
+            qb.appendWhere("email = '" + uri.getLastPathSegment() + "' OR email2 = '" + uri.getLastPathSegment() + "'");
+            break;
 
 		case PROFILE_ALLROWS:
 			qb.setTables(TABLE_PROFILE);
