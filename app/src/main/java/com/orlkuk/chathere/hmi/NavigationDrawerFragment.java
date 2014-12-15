@@ -8,6 +8,8 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.net.Uri;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,12 +26,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.orlkuk.chathere.R;
+import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
 /**
@@ -67,8 +72,19 @@ public class NavigationDrawerFragment extends Fragment  implements LoaderManager
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private String currentContact;
 
-    public NavigationDrawerFragment() {
+    public NavigationDrawerFragment()
+    {
+    }
+
+    void setCurrentContact(String contact)
+    {
+        currentContact = contact;
+    }
+
+    public SimpleCursorAdapter getAdapter() {
+        return mAdapter;
     }
 
     @Override
@@ -114,31 +130,35 @@ public class NavigationDrawerFragment extends Fragment  implements LoaderManager
 
         mAdapter  = new SimpleCursorAdapter(
                         getActionBar().getThemedContext(),
-                        R.layout.main_list_item,
+                        R.layout.chat_list_item,
                         null,
-                        new String[]{DataProvider.COL_NAME, DataProvider.COL_COUNT},
-                        new int[]{R.id.text1, R.id.text2},
+                        new String[]{DataProvider.COL_MSG, DataProvider.COL_AT},
+                        new int[]{R.id.messageTextView, R.id.dateTextView},
                         0);
 
         mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                switch(view.getId()) {
-                    case R.id.text2:
-                        int count = cursor.getInt(columnIndex);
-                        if (count > 0) {
-                            ((TextView)view).setText(String.format("%d new message%s", count, count==1 ? "" : "s"));
+                switch (view.getId()) {
+                    case R.id.messageTextView:
+                        LinearLayout root = (LinearLayout) view.getParent().getParent();
+                        LinearLayout box = (LinearLayout) view.getParent();
+                        if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {
+                            root.setGravity(Gravity.RIGHT);
+                            root.setPadding(50, 10, 10, 10);
+                            box.setBackgroundColor(getResources().getColor(R.color.user));
+                        } else {
+                            root.setGravity(Gravity.LEFT);
+                            root.setPadding(10, 10, 50, 10);
+                            box.setBackgroundColor(getResources().getColor(R.color.contact));
                         }
-                        return true;
+                        break;
                 }
                 return false;
             }
         });
 
         mDrawerListView.setAdapter(mAdapter);
-
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
     }
 
@@ -317,11 +337,11 @@ public class NavigationDrawerFragment extends Fragment  implements LoaderManager
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader loader = new CursorLoader(getActionBar().getThemedContext(),
-                DataProvider.CONTENT_URI_PROFILE,
-                new String[]{DataProvider.COL_ID, DataProvider.COL_NAME, DataProvider.COL_COUNT},
+                Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, currentContact),
+                new String[]{DataProvider.COL_ID, DataProvider.COL_FROM, DataProvider.COL_LON, DataProvider.COL_LAT, DataProvider.COL_MSG, DataProvider.COL_AT},
                 null,
                 null,
-                DataProvider.COL_ID + " DESC");
+                DataProvider.COL_ID + " ASC");
         return loader;
     }
 

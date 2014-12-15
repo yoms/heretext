@@ -1,8 +1,16 @@
 <resources>
 
     <!-- Application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        
+    <style name="HereTextTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/HereTextActionBar</item>
     </style>
+
+    <style name="HereTextActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/contact</item>
+    </style>
+
+    <color name="user">#9E9E9E</color>
+    <color name="contact">#D32F2F</color>
+    <color name="listBackground">#FAFAFA</color>
 
 </resources>

@@ -1,29 +1,18 @@
 package com.orlkuk.chathere.hmi;
 
-import android.app.Activity;
-
 import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.SimpleCursorAdapter;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -32,9 +21,7 @@ import com.orlkuk.chathere.R;
 import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -71,7 +58,12 @@ public class ChatActivity  extends FragmentActivity
         }
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
+
+        mNavigationDrawerFragment.setCurrentContact(mProfileEmail);
+
         setUpMapIfNeeded();
+        populateMarkers();
+
         mTitle = getTitle();
 
         // Set up the drawer.
@@ -101,30 +93,17 @@ public class ChatActivity  extends FragmentActivity
     public void onNavigationDrawerItemSelected(int position) {
 
         // Check if we were successful in obtaining the map.
-        if (mMap != null) {
-
-            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, Common.getPreferredEmail()), null, null, null, null);
-            for(Marker mark : currentsMarkers.values())
-            {
-                mark.setVisible(false);
-            }
-            while( c.moveToNext())
-            {
+        if(mNavigationDrawerFragment != null) {
+            SimpleCursorAdapter adp = ((SimpleCursorAdapter) mNavigationDrawerFragment.getAdapter());
+            if (adp != null) {
+                Cursor c = adp.getCursor();
+                c.moveToPosition(position);
                 double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
                 double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
-                String msg = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
-                String markerId = c.getString(c.getColumnIndex(DataProvider.COL_ID));
-
-                if(currentsMarkers.containsKey(markerId)) {
-                    currentsMarkers.get(markerId).setVisible(true);
-                }
-                else {
-                    currentsMarkers.put(markerId, mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg)));
-                }
-
+                currentsMarkers.values();
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 12.0f));
             }
         }
-        Log.e(this.getLocalClassName(), "item " + position + " Selected");
     }
 
     public void restoreActionBar() {
@@ -163,5 +142,31 @@ public class ChatActivity  extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void populateMarkers()
+    {
+        if (mMap != null) {
+
+            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, Common.getPreferredEmail()), null, null, null, null);
+            for(Marker mark : currentsMarkers.values())
+            {
+                mark.setVisible(false);
+            }
+            while( c.moveToNext())
+            {
+                double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
+                double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
+                String msg = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
+                String markerId = c.getString(c.getColumnIndex(DataProvider.COL_ID));
+
+                if(currentsMarkers.containsKey(markerId)) {
+                    currentsMarkers.get(markerId).setVisible(true);
+                }
+                else {
+                    currentsMarkers.put(markerId, mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg)));
+                }
+
+            }
+        }
+    }
 
 }
