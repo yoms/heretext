@@ -1,15 +1,20 @@
 package com.orlkuk.chathere.hmi;
 
 import android.app.ActionBar;
+import android.content.ContentValues;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,15 +23,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.orlkuk.chathere.R;
+import com.orlkuk.chathere.gcm.GcmUtil;
+import com.orlkuk.chathere.gcm.ServerUtilities;
 import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class ChatActivity  extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, MessageDialogFragment.MessageDialogListener{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -39,6 +47,7 @@ public class ChatActivity  extends FragmentActivity
     private CharSequence mTitle;
     private GoogleMap mMap;
     private String mProfileName;
+    private GcmUtil mGcmUtil;
     private String mProfileEmail;
     private String profileId;
     private Map<String, Marker> currentsMarkers;
@@ -70,6 +79,7 @@ public class ChatActivity  extends FragmentActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+        mGcmUtil = new GcmUtil(getApplicationContext());
     }
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -81,9 +91,12 @@ public class ChatActivity  extends FragmentActivity
                 mMap.setOnMapLongClickListener( new GoogleMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(LatLng latLng) {
-                        mMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                .title("You are here"));
+
+
+                        FragmentManager fm = getSupportFragmentManager();
+                        MessageDialogFragment messageDialogFragment = new MessageDialogFragment();
+                        messageDialogFragment.setPosition(latLng);
+                        messageDialogFragment.show(fm, "fragment_message_dialog");
                     }
                 });
             }
@@ -101,7 +114,7 @@ public class ChatActivity  extends FragmentActivity
                 double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
                 double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
                 currentsMarkers.values();
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 12.0f));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 20.0f));
             }
         }
     }
@@ -167,6 +180,40 @@ public class ChatActivity  extends FragmentActivity
 
             }
         }
+    }
+
+    public void onSendMessageClicked(final String inputText, final LatLng latLng)
+    {
+        Log.d("TOTO", inputText + latLng.toString());
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    ServerUtilities.send(latLng, inputText, mProfileEmail);
+
+                    ContentValues values = new ContentValues(4);
+                    values.put(DataProvider.COL_LAT, latLng.latitude);
+                    values.put(DataProvider.COL_LON, latLng.longitude);
+                    values.put(DataProvider.COL_MSG, inputText);
+                    values.put(DataProvider.COL_TO, mProfileEmail);
+                    getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+                    return true;
+
+                } catch (IOException ex) {
+                    return false;
+                }
+            }
+            @Override
+            protected void onPostExecute(Boolean sended) {
+                if(sended) {
+                    mNavigationDrawerFragment.getAdapter().notifyDataSetChanged();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Unable to send the message", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            }.execute(null, null, null);
     }
 
 }

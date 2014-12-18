@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.orlkuk.chathere.model.Common;
 
 
@@ -80,13 +81,13 @@ public final class ServerUtilities {
     /**
      * Send a message.
      */
-    public static void send(double lat, double lon, String msg, String to) throws IOException {
+    public static void send(LatLng latLng, String msg, String to) throws IOException {
         //Log.i(TAG, "sending message (msg = " + msg + ")");
         String serverUrl = Common.getServerUrl() + "/send";
         Map<String, String> params = new HashMap<String, String>();
         params.put(Common.MSG, msg);
-        params.put(Common.LAT, String.valueOf(lat));
-        params.put(Common.LON, String.valueOf(lon));
+        params.put(Common.LAT, String.valueOf(latLng.latitude));
+        params.put(Common.LON, String.valueOf(latLng.longitude));
         params.put(Common.FROM, Common.getPreferredEmail());
         params.put(Common.TO, to);        
         

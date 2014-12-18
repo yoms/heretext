@@ -7,16 +7,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.location.Location;
 import android.location.LocationListener;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.orlkuk.chathere.R;
+import com.orlkuk.chathere.hmi.MainActivity;
+import com.orlkuk.chathere.model.Common;
 
 public class LocationReceiver extends BroadcastReceiver {
-
-    private static final int NOTIFICATION_ID = 1000;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -32,36 +34,23 @@ public class LocationReceiver extends BroadcastReceiver {
             Log.d(getClass().getSimpleName(), "exiting");
         }
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, null, 0);
+        Notification.Builder mBuilder = new Notification.Builder(context)
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(context.getString(R.string.app_name))
+                .setContentText("You are near a message.");
+        if (!TextUtils.isEmpty(Common.getRingtone())) {
+            mBuilder.setSound(Uri.parse(Common.getRingtone()));
+        }
 
-        Notification notification = createNotification();
-        notification.setLatestEventInfo(context,
-                "Proximity Alert!", "You are near your point of interest.", pendingIntent);
+        Intent launchAppIntent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pi = PendingIntent.getActivity(context, 0, launchAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(pi);
 
-        notificationManager.notify(NOTIFICATION_ID, notification);
+        mNotificationManager.notify(1, mBuilder.getNotification());
 
     }
-
-    private Notification createNotification()
-    {
-        Notification notification = new Notification();
-
-        notification.when = System.currentTimeMillis();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-
-        notification.defaults |= Notification.DEFAULT_VIBRATE;
-        notification.defaults |= Notification.DEFAULT_LIGHTS;
-
-        notification.ledARGB = Color.WHITE;
-        notification.ledOnMS = 1500;
-        notification.ledOffMS = 1500;
-
-        return notification;
-    }
-
 }
