@@ -7,10 +7,18 @@
 
     <style name="HereTextActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/contact</item>
+        <item name="android:titleTextStyle">@style/ActionBarTitleText</item>
+    </style>
+    <!-- ActionBar title text -->
+    <style name="ActionBarTitleText"
+        parent="android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/contactText</item>
     </style>
 
-    <color name="user">#9E9E9E</color>
-    <color name="contact">#D32F2F</color>
-    <color name="listBackground">#FAFAFA</color>
+    <color name="user">#FAFAFA</color>
+    <color name="contact">#c41915</color>
+    <color name="userText">#000000</color>
+    <color name="contactText">#FFFFFF</color>
+    <color name="listBackground">#eeeeee</color>
 
 </resources>

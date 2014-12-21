@@ -10,15 +10,19 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -71,6 +75,19 @@ public class ChatActivity  extends FragmentActivity
         mNavigationDrawerFragment.setCurrentContact(mProfileEmail);
 
         setUpMapIfNeeded();
+
+        mMap.setOnMapLongClickListener( new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+
+
+                FragmentManager fm = getSupportFragmentManager();
+                MessageDialogFragment messageDialogFragment = new MessageDialogFragment();
+                messageDialogFragment.setPosition(latLng);
+                messageDialogFragment.show(fm, "fragment_message_dialog");
+            }
+        });
+        
         populateMarkers();
 
         mTitle = getTitle();
@@ -88,17 +105,6 @@ public class ChatActivity  extends FragmentActivity
             SupportMapFragment frag = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
             if (frag != null) {
                 mMap = frag.getMap();
-                mMap.setOnMapLongClickListener( new GoogleMap.OnMapLongClickListener() {
-                    @Override
-                    public void onMapLongClick(LatLng latLng) {
-
-
-                        FragmentManager fm = getSupportFragmentManager();
-                        MessageDialogFragment messageDialogFragment = new MessageDialogFragment();
-                        messageDialogFragment.setPosition(latLng);
-                        messageDialogFragment.show(fm, "fragment_message_dialog");
-                    }
-                });
             }
         }
     }
@@ -119,28 +125,29 @@ public class ChatActivity  extends FragmentActivity
         }
     }
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
     public String getProfileEmail() {
         return mProfileEmail;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.chat, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.chat, menu);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions( ActionBar.DISPLAY_SHOW_CUSTOM );
+        RoundedImageView imageView = new RoundedImageView(actionBar.getThemedContext());
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        imageView.setImageResource(R.drawable.ic_contact_picture);
+        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.LEFT
+                | Gravity.CENTER_VERTICAL);
+        layoutParams.rightMargin = 40;
+        layoutParams.topMargin = 10;
+        layoutParams.bottomMargin = 10;
+        imageView.setLayoutParams(layoutParams);
+        actionBar.setCustomView(imageView);
+        return true;
     }
 
     @Override
@@ -159,7 +166,7 @@ public class ChatActivity  extends FragmentActivity
     {
         if (mMap != null) {
 
-            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, Common.getPreferredEmail()), null, null, null, null);
+            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, mProfileEmail), null, null, null, null);
             for(Marker mark : currentsMarkers.values())
             {
                 mark.setVisible(false);
@@ -169,13 +176,25 @@ public class ChatActivity  extends FragmentActivity
                 double lat = c.getDouble(c.getColumnIndex(DataProvider.COL_LAT));
                 double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
                 String msg = c.getString(c.getColumnIndex(DataProvider.COL_MSG));
+                String to = c.getString(c.getColumnIndex(DataProvider.COL_TO));
                 String markerId = c.getString(c.getColumnIndex(DataProvider.COL_ID));
 
                 if(currentsMarkers.containsKey(markerId)) {
                     currentsMarkers.get(markerId).setVisible(true);
                 }
                 else {
-                    currentsMarkers.put(markerId, mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(msg)));
+                    BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+                    if (to != null)
+                    {
+                        if (to.equals(mProfileEmail)) {
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
+                        }
+                    }
+                    currentsMarkers.put(markerId,
+                            mMap.addMarker(new MarkerOptions().
+                                                position(new LatLng(lat, lon)).
+                                                title(msg).
+                                                icon(icon)));
                 }
 
             }
@@ -184,7 +203,6 @@ public class ChatActivity  extends FragmentActivity
 
     public void onSendMessageClicked(final String inputText, final LatLng latLng)
     {
-        Log.d("TOTO", inputText + latLng.toString());
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
