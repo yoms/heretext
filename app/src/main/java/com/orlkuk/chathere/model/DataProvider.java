@@ -34,7 +34,8 @@ public class DataProvider extends ContentProvider {
 	public static final String TABLE_PROFILE = "profile";
 	public static final String COL_NAME = "name";
 	public static final String COL_EMAIL = "email";
-	public static final String COL_COUNT = "count";
+    public static final String COL_COUNT = "count";
+    public static final String COL_CONTACT_ID = "contactId";
 	
 	private DbHelper dbHelper;
 	
@@ -195,7 +196,7 @@ public class DataProvider extends ContentProvider {
 	private static class DbHelper extends SQLiteOpenHelper {
 		
 		private static final String DATABASE_NAME = "chathere.db";
-		private static final int DATABASE_VERSION = 1;
+		private static final int DATABASE_VERSION = 2;
 
 		public DbHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -204,7 +205,7 @@ public class DataProvider extends ContentProvider {
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL("create table messages (_id integer primary key autoincrement, msg text, email text, email2 text, latitude float, longitude float, at datetime default current_timestamp);");
-			db.execSQL("create table profile (_id integer primary key autoincrement, name text, email text unique, count integer default 0);");
+			db.execSQL("create table profile (_id integer primary key autoincrement, name text, email text unique, count integer default 0, contactId integer default 0);");
 		}
 
 		@Override

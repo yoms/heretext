@@ -1,15 +1,17 @@
 package com.orlkuk.chathere.hmi;
 
 import android.app.ActionBar;
+import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,34 +48,33 @@ public class ChatActivity  extends FragmentActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
     private CharSequence mTitle;
     private GoogleMap mMap;
-    private String mProfileName;
+    private String mContactName;
     private GcmUtil mGcmUtil;
-    private String mProfileEmail;
-    private String profileId;
+    private String mContactEmail;
+    private String mContactID;
+    private String mContactHostID;
     private Map<String, Marker> currentsMarkers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        profileId = getIntent().getStringExtra(Common.PROFILE_ID);
+        mContactID = getIntent().getStringExtra(Common.PROFILE_ID);
         currentsMarkers = new HashMap<String, Marker>();
 
 
-        Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), null, null, null, null);
+        Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, mContactID), null, null, null, null);
         if (c.moveToFirst()) {
-            mProfileName = c.getString(c.getColumnIndex(DataProvider.COL_NAME));
-            mProfileEmail = c.getString(c.getColumnIndex(DataProvider.COL_EMAIL));
+            mContactName = c.getString(c.getColumnIndex(DataProvider.COL_NAME));
+            mContactEmail = c.getString(c.getColumnIndex(DataProvider.COL_EMAIL));
+            mContactHostID = c.getString(c.getColumnIndex(DataProvider.COL_CONTACT_ID));
         }
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
 
-        mNavigationDrawerFragment.setCurrentContact(mProfileEmail);
+        mNavigationDrawerFragment.setCurrentContact(mContactEmail);
 
         setUpMapIfNeeded();
 
@@ -126,7 +128,7 @@ public class ChatActivity  extends FragmentActivity
     }
 
     public String getProfileEmail() {
-        return mProfileEmail;
+        return mContactEmail;
     }
 
     @Override
@@ -135,9 +137,19 @@ public class ChatActivity  extends FragmentActivity
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayOptions( ActionBar.DISPLAY_SHOW_CUSTOM );
+        actionBar.setTitle(mContactName);
         RoundedImageView imageView = new RoundedImageView(actionBar.getThemedContext());
         imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setImageResource(R.drawable.ic_contact_picture);
+
+
+        Bitmap photo = null;
+        InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
+                ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(mContactHostID)));
+
+        if (inputStream != null) {
+            photo = BitmapFactory.decodeStream(inputStream);
+            imageView.setImageBitmap(photo);
+        }
         ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
                 ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT, Gravity.LEFT
@@ -166,7 +178,7 @@ public class ChatActivity  extends FragmentActivity
     {
         if (mMap != null) {
 
-            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, mProfileEmail), null, null, null, null);
+            Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_USER_MESSAGES, mContactEmail), null, null, null, null);
             for(Marker mark : currentsMarkers.values())
             {
                 mark.setVisible(false);
@@ -186,7 +198,7 @@ public class ChatActivity  extends FragmentActivity
                     BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
                     if (to != null)
                     {
-                        if (to.equals(mProfileEmail)) {
+                        if (to.equals(mContactEmail)) {
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
                         }
                     }
@@ -207,13 +219,13 @@ public class ChatActivity  extends FragmentActivity
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    ServerUtilities.send(latLng, inputText, mProfileEmail);
+                    ServerUtilities.send(latLng, inputText, mContactEmail);
 
                     ContentValues values = new ContentValues(4);
                     values.put(DataProvider.COL_LAT, latLng.latitude);
                     values.put(DataProvider.COL_LON, latLng.longitude);
                     values.put(DataProvider.COL_MSG, inputText);
-                    values.put(DataProvider.COL_TO, mProfileEmail);
+                    values.put(DataProvider.COL_TO, mContactEmail);
                     getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
                     return true;
 

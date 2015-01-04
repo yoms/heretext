@@ -5,19 +5,32 @@ import com.orlkuk.chathere.model.Common;
 import com.orlkuk.chathere.model.DataProvider;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ListActivity;
 import android.app.LoaderManager;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author appsrox.com
@@ -25,7 +38,8 @@ import android.widget.TextView;
  */
 public class MainActivity extends ListActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-	private SimpleCursorAdapter adapter;
+    private SimpleCursorAdapter adapter;
+    private final int PICK_CONTACT_ACTIVITY = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +48,8 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 		adapter = new SimpleCursorAdapter(this,
 				R.layout.main_list_item,
 				null,
-				new String[]{DataProvider.COL_NAME, DataProvider.COL_COUNT},
-				new int[]{R.id.text1, R.id.text2},
+				new String[]{DataProvider.COL_NAME, DataProvider.COL_CONTACT_ID},
+				new int[]{R.id.text1, R.id.avatar},
 				0);
 
 		adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
@@ -43,10 +57,27 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 			@Override
 			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 				switch(view.getId()) {
-				case R.id.text2:
-					int count = cursor.getInt(columnIndex);
-					if (count > 0) {
-						((TextView)view).setText(String.format("%d new message%s", count, count==1 ? "" : "s"));
+				case R.id.avatar:
+					int contactID = cursor.getInt(columnIndex);
+					if (contactID > 0) {
+                        Bitmap photo = null;
+
+                        try {
+                            InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
+                                    ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(contactID)));
+
+                            if (inputStream != null) {
+                                photo = BitmapFactory.decodeStream(inputStream);
+                                ImageView imageView = (ImageView) view;
+                                imageView.setImageBitmap(photo);
+                            }
+
+                            assert inputStream != null;
+                            inputStream.close();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 					}
 					return true;
 				}
@@ -58,18 +89,6 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
-
-/*		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-		ArrayAdapter<CharSequence> dropdownAdapter = ArrayAdapter.createFromResource(this, R.array.dropdown_arr, android.R.layout.simple_list_item_1);
-		actionBar.setListNavigationCallbacks(dropdownAdapter, new ActionBar.OnNavigationListener() {
-
-			@Override
-			public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-				getLoaderManager().restartLoader(0, getArgs(itemPosition), MainActivity.this);
-				return true;
-			}
-		});*/
 
 		getLoaderManager().initLoader(0, null, this);
 	}
@@ -85,13 +104,13 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
-			AddContactDialog dialog = new AddContactDialog();
-			dialog.show(getFragmentManager(), "AddContactDialog");
+            Intent contactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Email.CONTENT_URI);
+            startActivityForResult(contactIntent, PICK_CONTACT_ACTIVITY);
 			return true;
 
 		case R.id.action_settings:
-			Intent intent = new Intent(this, SettingsActivity.class);
-			startActivity(intent);
+			Intent settingsIntent = new Intent(this, SettingsActivity.class);
+			startActivity(settingsIntent);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -110,7 +129,7 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		CursorLoader loader = new CursorLoader(this,
 				DataProvider.CONTENT_URI_PROFILE,
-				new String[]{DataProvider.COL_ID, DataProvider.COL_NAME, DataProvider.COL_COUNT},
+				new String[]{DataProvider.COL_ID, DataProvider.COL_NAME, DataProvider.COL_CONTACT_ID},
 				null,
 				null,
 				DataProvider.COL_ID + " DESC");
@@ -127,4 +146,51 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 		adapter.swapCursor(null);
 	}
 
+    @Override
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+
+        switch (reqCode) {
+            case (PICK_CONTACT_ACTIVITY) :
+                if (resultCode == Activity.RESULT_OK) {
+                    Uri emailData = data.getData();
+                    String name = null;
+                    String uri = null;
+                    String email = null;
+                    String id = null;
+
+                    // Find email and ID
+                    Cursor emailCursor = getContentResolver().query(emailData, null, null, null, null);
+                    if (emailCursor.moveToFirst()) {
+
+                        id = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.CONTACT_ID));
+                        email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
+                    }
+                    emailCursor.close();
+
+
+                    // Find contact name
+                    Cursor nameCursor = getContentResolver().query(
+                              ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id))
+                            , null, null, null, null);
+                    if (nameCursor.moveToFirst()) {
+                        name = nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    }
+                    nameCursor.close();
+
+                    if( name != null && email != null) {
+                        try {
+                            ContentValues values = new ContentValues(2);
+                            values.put(DataProvider.COL_NAME, name);
+                            values.put(DataProvider.COL_EMAIL, email);
+                            values.put(DataProvider.COL_CONTACT_ID, id);
+                            getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
+                        } catch (SQLException sqle) {
+                            Log.e(getLocalClassName(), "Impossible to insert contact");
+                        }
+                    }
+                }
+                break;
+        }
+    }
 }
