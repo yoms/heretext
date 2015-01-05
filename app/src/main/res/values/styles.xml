@@ -6,6 +6,7 @@
     </style>
 
     <style name="HereTextActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:icon">@drawable/ic_launcher_white</item>
         <item name="android:background">@color/contact</item>
         <item name="android:titleTextStyle">@style/ActionBarTitleText</item>
     </style>
