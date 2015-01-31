@@ -66,14 +66,15 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
                             InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
                                     ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(contactID)));
 
+
                             if (inputStream != null) {
                                 photo = BitmapFactory.decodeStream(inputStream);
-                                ImageView imageView = (ImageView) view;
-                                imageView.setImageBitmap(photo);
+                                RoundedImageView imageView = (RoundedImageView) view;
+                                if(photo != null) {
+                                    imageView.setImageBitmap(photo);
+                                }
+                                inputStream.close();
                             }
-
-                            assert inputStream != null;
-                            inputStream.close();
 
                         } catch (IOException e) {
                             e.printStackTrace();

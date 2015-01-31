@@ -3,6 +3,7 @@ package com.orlkuk.chathere.hmi;
 import android.app.ActionBar;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,7 +49,6 @@ public class ChatActivity  extends FragmentActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    private CharSequence mTitle;
     private GoogleMap mMap;
     private String mContactName;
     private GcmUtil mGcmUtil;
@@ -56,6 +56,11 @@ public class ChatActivity  extends FragmentActivity
     private String mContactID;
     private String mContactHostID;
     private Map<String, Marker> currentsMarkers;
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +97,6 @@ public class ChatActivity  extends FragmentActivity
         
         populateMarkers();
 
-        mTitle = getTitle();
-
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
@@ -123,6 +126,7 @@ public class ChatActivity  extends FragmentActivity
                 double lon = c.getDouble(c.getColumnIndex(DataProvider.COL_LON));
                 currentsMarkers.values();
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 20.0f));
+
             }
         }
     }
@@ -133,32 +137,29 @@ public class ChatActivity  extends FragmentActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.chat, menu);
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayOptions( ActionBar.DISPLAY_SHOW_CUSTOM );
-        actionBar.setTitle(mContactName);
         RoundedImageView imageView = new RoundedImageView(actionBar.getThemedContext());
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        imageView.setPadding(-10,-10,-10,-10);
 
 
-        Bitmap photo = null;
         InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
                 ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(mContactHostID)));
 
         if (inputStream != null) {
-            photo = BitmapFactory.decodeStream(inputStream);
+            Bitmap photo = BitmapFactory.decodeStream(inputStream);
             imageView.setImageBitmap(photo);
         }
         ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
                 ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT, Gravity.LEFT
                 | Gravity.CENTER_VERTICAL);
-        layoutParams.rightMargin = 40;
-        layoutParams.topMargin = 10;
-        layoutParams.bottomMargin = 10;
         imageView.setLayoutParams(layoutParams);
         actionBar.setCustomView(imageView);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setTitle(mContactName);
         return true;
     }
 
@@ -195,7 +196,7 @@ public class ChatActivity  extends FragmentActivity
                     currentsMarkers.get(markerId).setVisible(true);
                 }
                 else {
-                    BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+                    BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker();
                     if (to != null)
                     {
                         if (to.equals(mContactEmail)) {
@@ -204,9 +205,9 @@ public class ChatActivity  extends FragmentActivity
                     }
                     currentsMarkers.put(markerId,
                             mMap.addMarker(new MarkerOptions().
-                                                position(new LatLng(lat, lon)).
-                                                title(msg).
-                                                icon(icon)));
+                                    position(new LatLng(lat, lon)).
+                                    title(msg).
+                                    icon(icon)));
                 }
 
             }
@@ -236,7 +237,9 @@ public class ChatActivity  extends FragmentActivity
             @Override
             protected void onPostExecute(Boolean sended) {
                 if(sended) {
-                    mNavigationDrawerFragment.getAdapter().notifyDataSetChanged();
+                    mNavigationDrawerFragment.getLoaderManager().restartLoader(0, null, mNavigationDrawerFragment);
+                    populateMarkers();
+                    Toast.makeText(getApplicationContext(), "Message sent", Toast.LENGTH_LONG).show();
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "Unable to send the message", Toast.LENGTH_LONG).show();
