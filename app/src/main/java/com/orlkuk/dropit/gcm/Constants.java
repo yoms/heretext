@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.gcm;
+package com.orlkuk.dropit.gcm;
 
 /**
  * @author appsrox.com

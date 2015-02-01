@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.hmi;
+package com.orlkuk.dropit.hmi;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 
 import com.google.android.gms.maps.model.LatLng;
-import com.orlkuk.chathere.R;
+import com.orlkuk.dropit.R;
 
 /**
  * Created by guillaume on 18/12/14.

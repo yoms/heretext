@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.gcm;
+package com.orlkuk.dropit.gcm;
 
 import java.io.IOException;
 import java.util.Random;
@@ -13,7 +13,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.orlkuk.chathere.model.Common;
+import com.orlkuk.dropit.model.Common;
 
 public class GcmUtil {
 	

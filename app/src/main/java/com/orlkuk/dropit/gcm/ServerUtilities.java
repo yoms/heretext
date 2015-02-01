@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.orlkuk.chathere.gcm;
+package com.orlkuk.dropit.gcm;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.orlkuk.chathere.model.Common;
+import com.orlkuk.dropit.model.Common;
 
 
 /**

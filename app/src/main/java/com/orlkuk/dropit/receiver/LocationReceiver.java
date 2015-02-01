@@ -1,22 +1,18 @@
-package com.orlkuk.chathere.receiver;
+package com.orlkuk.dropit.receiver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Bundle;
-import android.location.Location;
-import android.location.LocationListener;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.hmi.MainActivity;
-import com.orlkuk.chathere.model.Common;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.hmi.MainActivity;
+import com.orlkuk.dropit.model.Common;
 
 public class LocationReceiver extends BroadcastReceiver {
 

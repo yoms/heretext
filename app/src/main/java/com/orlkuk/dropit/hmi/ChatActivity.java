@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.hmi;
+package com.orlkuk.dropit.hmi;
 
 import android.app.ActionBar;
 import android.content.ContentUris;
@@ -29,11 +29,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.gcm.GcmUtil;
-import com.orlkuk.chathere.gcm.ServerUtilities;
-import com.orlkuk.chathere.model.Common;
-import com.orlkuk.chathere.model.DataProvider;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.gcm.GcmUtil;
+import com.orlkuk.dropit.gcm.ServerUtilities;
+import com.orlkuk.dropit.model.Common;
+import com.orlkuk.dropit.model.DataProvider;
 
 import java.io.IOException;
 import java.io.InputStream;

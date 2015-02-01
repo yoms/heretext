@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.hmi;
+package com.orlkuk.dropit.hmi;
 
 
 import android.app.Activity;
@@ -8,33 +8,24 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.model.Common;
-import com.orlkuk.chathere.model.DataProvider;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.model.DataProvider;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.

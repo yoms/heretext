@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.model;
+package com.orlkuk.dropit.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +11,9 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.Patterns;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.orlkuk.chathere.gcm.Constants;
-import com.orlkuk.chathere.receiver.LocationReceiver;
+import com.orlkuk.dropit.gcm.Constants;
 
 /**
  * @author appsrox.com
@@ -27,7 +23,7 @@ public class Common extends Application {
 	
 	public static final String PROFILE_ID = "profile_id";
 	
-	public static final String ACTION_REGISTER = "com.orlkuk.chathere.REGISTER";
+	public static final String ACTION_REGISTER = "com.orlkuk.dropit.REGISTER";
 	public static final String EXTRA_STATUS = "status";
 	public static final int STATUS_SUCCESS = 1;
 	public static final int STATUS_FAILED = 0;

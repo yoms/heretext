@@ -1,9 +1,9 @@
-package com.orlkuk.chathere.hmi;
+package com.orlkuk.dropit.hmi;
 
 import java.util.List;
 
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.model.Common;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.model.Common;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -86,12 +86,7 @@ public class SettingsActivity extends PreferenceActivity {
 		bindPreferenceSummaryToValue(findPreference("display_name"));
 		bindPreferenceSummaryToValue(findPreference("chat_email_id"));
 		bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-		
-		// Add 'messaging' preferences, and a corresponding header.
-		fakeHeader = new PreferenceCategory(this);
-		fakeHeader.setTitle(R.string.pref_header_messaging);
-		getPreferenceScreen().addPreference(fakeHeader);
-		addPreferencesFromResource(R.xml.pref_messaging);
+
 		
 	}	
 
@@ -247,17 +242,5 @@ public class SettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
 		}
 	}
-	
-	/**
-	 * This fragment shows messaging preferences only.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public static class MessagingPreferenceFragment extends PreferenceFragment {
-		@Override
-		public void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_messaging);
-		}
-	}	
 
 }

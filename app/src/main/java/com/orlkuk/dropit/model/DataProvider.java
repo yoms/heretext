@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.model;
+package com.orlkuk.dropit.model;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -17,9 +17,9 @@ import android.net.Uri;
  */
 public class DataProvider extends ContentProvider {
 
-    public static final Uri CONTENT_URI_MESSAGES = Uri.parse("content://com.orlkuk.chathere.provider/messages");
-    public static final Uri CONTENT_URI_USER_MESSAGES = Uri.parse("content://com.orlkuk.chathere.provider/usermessages");
-	public static final Uri CONTENT_URI_PROFILE = Uri.parse("content://com.orlkuk.chathere.provider/profile");
+    public static final Uri CONTENT_URI_MESSAGES = Uri.parse("content://com.orlkuk.dropit.provider/messages");
+    public static final Uri CONTENT_URI_USER_MESSAGES = Uri.parse("content://com.orlkuk.dropit.provider/usermessages");
+	public static final Uri CONTENT_URI_PROFILE = Uri.parse("content://com.orlkuk.dropit.provider/profile");
 
 	public static final String COL_ID = "_id";
 	
@@ -48,11 +48,11 @@ public class DataProvider extends ContentProvider {
 	private static final UriMatcher uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI("com.orlkuk.chathere.provider", "messages", MESSAGES_ALLROWS);
-        uriMatcher.addURI("com.orlkuk.chathere.provider", "messages/#", MESSAGES_SINGLE_ROW);
-        uriMatcher.addURI("com.orlkuk.chathere.provider", "usermessages/*", MESSAGES_FOR_USER);
-		uriMatcher.addURI("com.orlkuk.chathere.provider", "profile", PROFILE_ALLROWS);
-		uriMatcher.addURI("com.orlkuk.chathere.provider", "profile/#", PROFILE_SINGLE_ROW);
+		uriMatcher.addURI("com.orlkuk.dropit.provider", "messages", MESSAGES_ALLROWS);
+        uriMatcher.addURI("com.orlkuk.dropit.provider", "messages/#", MESSAGES_SINGLE_ROW);
+        uriMatcher.addURI("com.orlkuk.dropit.provider", "usermessages/*", MESSAGES_FOR_USER);
+		uriMatcher.addURI("com.orlkuk.dropit.provider", "profile", PROFILE_ALLROWS);
+		uriMatcher.addURI("com.orlkuk.dropit.provider", "profile/#", PROFILE_SINGLE_ROW);
 	}
 
 	@Override
@@ -195,7 +195,7 @@ public class DataProvider extends ContentProvider {
 	
 	private static class DbHelper extends SQLiteOpenHelper {
 		
-		private static final String DATABASE_NAME = "chathere.db";
+		private static final String DATABASE_NAME = "dropit.db";
 		private static final int DATABASE_VERSION = 2;
 
 		public DbHelper(Context context) {

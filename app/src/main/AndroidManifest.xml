@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.orlkuk.chathere"
+    package="com.orlkuk.dropit"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -9,10 +9,10 @@
         android:targetSdkVersion="17" />
 
     <permission
-        android:name="com.orlkuk.chathere.permission.C2D_MESSAGE"
+        android:name="com.orlkuk.dropit.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.orlkuk.chathere.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.orlkuk.dropit.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -32,12 +32,12 @@
 
 
     <application
-        android:name="com.orlkuk.chathere.model.Common"
+        android:name="com.orlkuk.dropit.model.Common"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/HereTextTheme" >
-        <activity android:name="com.orlkuk.chathere.hmi.MainActivity" >
+        <activity android:name="com.orlkuk.dropit.hmi.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,27 +46,27 @@
         </activity>
 
         <provider
-            android:name="com.orlkuk.chathere.model.DataProvider"
-            android:authorities="com.orlkuk.chathere.provider"
+            android:name="com.orlkuk.dropit.model.DataProvider"
+            android:authorities="com.orlkuk.dropit.provider"
             android:exported="false" >
         </provider>
 
         <receiver
-            android:name="com.orlkuk.chathere.receiver.GcmBroadcastReceiver"
+            android:name="com.orlkuk.dropit.receiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
 
-                <category android:name="com.orlkuk.chathere" />
+                <category android:name="com.orlkuk.dropit" />
             </intent-filter>
         </receiver>
 
         <activity
-            android:name="com.orlkuk.chathere.hmi.SettingsActivity"
+            android:name="com.orlkuk.dropit.hmi.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name="com.orlkuk.chathere.hmi.ChatActivity"
+            android:name="com.orlkuk.dropit.hmi.ChatActivity"
             android:logo="@drawable/ic_contact_picture" >
         </activity>
 

@@ -1,4 +1,4 @@
-package com.orlkuk.chathere.receiver;
+package com.orlkuk.dropit.receiver;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -9,20 +9,18 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.hmi.MainActivity;
-import com.orlkuk.chathere.model.Common;
-import com.orlkuk.chathere.model.DataProvider;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.hmi.MainActivity;
+import com.orlkuk.dropit.model.Common;
+import com.orlkuk.dropit.model.DataProvider;
 
 /**
  * @author appsrox.com

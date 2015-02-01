@@ -1,8 +1,8 @@
-package com.orlkuk.chathere.hmi;
+package com.orlkuk.dropit.hmi;
 
-import com.orlkuk.chathere.R;
-import com.orlkuk.chathere.model.Common;
-import com.orlkuk.chathere.model.DataProvider;
+import com.orlkuk.dropit.R;
+import com.orlkuk.dropit.model.Common;
+import com.orlkuk.dropit.model.DataProvider;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -24,10 +24,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
