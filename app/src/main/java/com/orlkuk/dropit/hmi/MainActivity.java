@@ -65,13 +65,17 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
                                     ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(contactID)));
 
 
+                            RoundedImageView imageView = (RoundedImageView) view;
                             if (inputStream != null) {
                                 photo = BitmapFactory.decodeStream(inputStream);
-                                RoundedImageView imageView = (RoundedImageView) view;
                                 if(photo != null) {
                                     imageView.setImageBitmap(photo);
                                 }
                                 inputStream.close();
+                            }
+                            else
+                            {
+                                imageView.setImageResource(R.drawable.ic_contact_picture);
                             }
 
                         } catch (IOException e) {
