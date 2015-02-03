@@ -16,12 +16,21 @@ android {
             keyAlias "androiddebugkey"
             keyPassword "android"
         }
+        release {
+            storeFile file("../../../../.android/dropit.keystore")
+            keyAlias "dropitreleasekey"
+        }
     }
     buildTypes {
-        release {
+        debug {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             debuggable true
             signingConfig signingConfigs.debug
+        }
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            debuggable false
+            signingConfig signingConfigs.release
         }
     }
 }
