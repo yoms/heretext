@@ -58,7 +58,6 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 				case R.id.avatar:
 					int contactID = cursor.getInt(columnIndex);
 					if (contactID > 0) {
-                        Bitmap photo = null;
 
                         try {
                             InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
@@ -67,7 +66,7 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
 
                             RoundedImageView imageView = (RoundedImageView) view;
                             if (inputStream != null) {
-                                photo = BitmapFactory.decodeStream(inputStream);
+                                Bitmap photo = BitmapFactory.decodeStream(inputStream);
                                 if(photo != null) {
                                     imageView.setImageBitmap(photo);
                                 }

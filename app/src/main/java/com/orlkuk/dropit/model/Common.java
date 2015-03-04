@@ -63,7 +63,9 @@ public class Common extends Application {
 		Account[] accounts = AccountManager.get(this).getAccounts();
 		for (Account account : accounts) {
 		    if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
-		        lst.add(account.name);
+                if (!lst.contains(account.name)){
+                    lst.add(account.name);
+                }
 		    }
 		}
 		return lst;
