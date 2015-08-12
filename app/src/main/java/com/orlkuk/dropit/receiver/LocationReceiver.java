@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.orlkuk.dropit.R;
-import com.orlkuk.dropit.hmi.MainActivity;
+import com.orlkuk.dropit.hmi.ContactListActivity;
 import com.orlkuk.dropit.model.Common;
 
 public class LocationReceiver extends BroadcastReceiver {
@@ -41,7 +41,7 @@ public class LocationReceiver extends BroadcastReceiver {
             mBuilder.setSound(Uri.parse(Common.getRingtone()));
         }
 
-        Intent launchAppIntent = new Intent(context, MainActivity.class);
+        Intent launchAppIntent = new Intent(context, ContactListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(context, 0, launchAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(pi);

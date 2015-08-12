@@ -18,7 +18,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.orlkuk.dropit.R;
-import com.orlkuk.dropit.hmi.MainActivity;
+import com.orlkuk.dropit.hmi.ContactListActivity;
 import com.orlkuk.dropit.model.Common;
 import com.orlkuk.dropit.model.DataProvider;
 
@@ -105,7 +105,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 		}
 		
 		if (launchApp) {
-			Intent intent = new Intent(ctx, MainActivity.class);
+			Intent intent = new Intent(ctx, ContactListActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			PendingIntent pi = PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			mBuilder.setContentIntent(pi);
