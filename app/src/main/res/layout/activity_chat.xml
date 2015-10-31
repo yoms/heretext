@@ -21,46 +21,60 @@
             tools:context=".ChatActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
-        <RelativeLayout
+
+        <LinearLayout
             android:id="@+id/sendLayout"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:background="@color/listBackground"
+            android:layout_height="74dp"
             android:layout_gravity="bottom"
-            android:padding="12dp"
-            android:visibility="gone"
-            >
+            android:orientation="vertical"
+            android:visibility="gone">
 
-            <ImageButton
-                android:id="@+id/sendBtn"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginLeft="8dp"
-                android:layout_alignParentRight="true"
-                android:background="@color/listBackground"
-                android:src="@drawable/ic_send_48dp"
-                android:contentDescription="send messages"
-                android:onClick="onSendMessageClicked"/>
+            <View
+                android:id="@+id/shadow"
+                android:layout_width="fill_parent"
+                android:layout_height="2.3dp"
+                android:background="@drawable/shadowed_rect" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_toLeftOf="@+id/sendBtn"
-                android:paddingRight="12dp"
-                android:paddingLeft="12dp"
-                android:background="@android:color/white">
-                <EditText
-                    android:id="@+id/msgEdit"
+            <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_alignBottom="@+id/sendBtn"
-                    android:layout_toLeftOf="@+id/sendBtn"
-                    android:inputType="textAutoCorrect"
-                    android:background="@android:color/white">
-                </EditText>
-            </LinearLayout>
+                    android:layout_gravity="bottom"
+                    android:background="@color/listBackground"
+                    android:padding="12dp">
 
-        </RelativeLayout>
+                    <ImageButton
+                        android:id="@+id/sendBtn"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_alignParentRight="true"
+                        android:background="@color/listBackground"
+                        android:src="@drawable/ic_send_48dp"
+                        android:contentDescription="send messages"
+                        android:onClick="onSendMessageClicked"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toLeftOf="@+id/sendBtn"
+                        android:paddingRight="12dp"
+                        android:paddingLeft="12dp"
+                        android:background="@android:color/white">
+                        <EditText
+                            android:id="@+id/msgEdit"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_alignBottom="@+id/sendBtn"
+                            android:layout_toLeftOf="@+id/sendBtn"
+                            android:inputType="textAutoCorrect"
+                            android:background="@android:color/white">
+                        </EditText>
+                    </LinearLayout>
+
+            </RelativeLayout>
+
+    </LinearLayout>
     </FrameLayout>
 
     <fragment android:id="@+id/navigation_drawer"

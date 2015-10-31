@@ -26,6 +26,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -106,8 +107,8 @@ public class ChatActivity  extends FragmentActivity
 
                 mLastLatLng = latLng;
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLastLatLng, 20.0f));
-                RelativeLayout sendRelativeLayout = (RelativeLayout) findViewById(R.id.sendLayout);
-                sendRelativeLayout.setVisibility(View.VISIBLE);
+                LinearLayout linearLayout = (LinearLayout) findViewById(R.id.sendLayout);
+                linearLayout.setVisibility(View.VISIBLE);
                 mSendButton.requestFocus();
 
                 if (mCurrentMessageMarker != null) {
@@ -160,8 +161,8 @@ public class ChatActivity  extends FragmentActivity
 
     public void clearMessageEdition()
     {
-        RelativeLayout sendRelativeLayout = (RelativeLayout) findViewById(R.id.sendLayout);
-        sendRelativeLayout.setVisibility(View.GONE);
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.sendLayout);
+        linearLayout.setVisibility(View.GONE);
         mMsgEdit.setText("");
         if (mCurrentMessageMarker != null) {
             mCurrentMessageMarker.setVisible(false);
