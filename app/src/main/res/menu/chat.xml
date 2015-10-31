@@ -3,7 +3,7 @@
     <item
         android:id="@+id/action_edit"
         android:showAsAction="always"
-        android:icon="@drawable/ic_mode_edit_white_48dp"
-        android:title="@string/action_edit"/>
+        android:icon="@drawable/ic_arrow_back_white_24dp"
+        android:title="@string/action_back"/>
 
 </menu>

@@ -15,8 +15,10 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
@@ -26,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -191,34 +194,6 @@ public class ChatActivity  extends FragmentActivity
 
     public String getProfileEmail() {
         return mContactEmail;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions( ActionBar.DISPLAY_SHOW_CUSTOM );
-        RoundedImageView imageView = new RoundedImageView(actionBar.getThemedContext());
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        imageView.setPadding(-10,-10,-10,-10);
-
-
-        InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
-                ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(mContactHostID)));
-
-        if (inputStream != null) {
-            Bitmap photo = BitmapFactory.decodeStream(inputStream);
-            imageView.setImageBitmap(photo);
-        }
-        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.LEFT
-                | Gravity.CENTER_VERTICAL);
-        imageView.setLayoutParams(layoutParams);
-        actionBar.setCustomView(imageView);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle(mContactName);
-        return true;
     }
 
     @Override
