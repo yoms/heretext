@@ -77,7 +77,7 @@ public class ContactListActivity extends Activity  implements LoaderManager.Load
                 R.layout.main_list_item,
                 null,
                 new String[]{DataProvider.COL_NAME, DataProvider.COL_CONTACT_ID},
-                new int[]{R.id.text1, R.id.avatar},
+                new int[]{R.id.contactNameLabel, R.id.avatar},
                 0);
 
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {

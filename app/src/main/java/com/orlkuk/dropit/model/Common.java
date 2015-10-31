@@ -38,7 +38,9 @@ public class Common extends Application {
 
     public static final long POINT_RADIUS = 1000; // in Meters
     public static final long PROX_ALERT_EXPIRATION = -1;
-    public static final String PROX_ALERT_INTENT =    "com.javacodegeeks.android.lbs.ProximityAlert";
+
+	//TODO add prox alert intent recevier
+    public static final String PROX_ALERT_INTENT =    "";
 
 
 
@@ -50,7 +52,7 @@ public class Common extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
+
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		List<String> emailList = getEmailList();

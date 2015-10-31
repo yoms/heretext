@@ -16,11 +16,42 @@
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
+            tools:layout="@layout/dummy_mapviewfragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/map"
             tools:context=".ChatActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+        <RelativeLayout
+            android:id="@+id/sendLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:visibility="gone"
+            android:layout_gravity="bottom">
+
+            <ImageButton
+                android:id="@+id/sendBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ic_send_black_36dp"
+                android:contentDescription="send messages"
+                android:background="#ffffff"
+                android:onClick="onSendMessageClicked"/>
+
+
+            <EditText
+                android:id="@+id/msgEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/sendBtn"
+                android:layout_toLeftOf="@+id/sendBtn"
+                android:inputType="textAutoCorrect">
+            </EditText>
+
+        </RelativeLayout>
     </FrameLayout>
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat

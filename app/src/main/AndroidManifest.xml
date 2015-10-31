@@ -70,8 +70,7 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".hmi.ChatActivity"
-            android:logo="@drawable/ic_contact_picture" >
+            android:name=".hmi.ChatActivity" >
         </activity>
 
         <meta-data

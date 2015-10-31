@@ -3,10 +3,12 @@ package com.orlkuk.dropit.hmi;
 import android.app.ActionBar;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,13 +19,19 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -42,7 +50,7 @@ import java.util.Map;
 
 
 public class ChatActivity  extends FragmentActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, MessageDialogFragment.MessageDialogListener{
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -55,7 +63,11 @@ public class ChatActivity  extends FragmentActivity
     private String mContactEmail;
     private String mContactID;
     private String mContactHostID;
+    private LatLng mLastLatLng;
+    private Marker mCurrentMessageMarker;
     private Map<String, Marker> currentsMarkers;
+    private ImageButton mSendButton;
+    private EditText mMsgEdit;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -68,6 +80,8 @@ public class ChatActivity  extends FragmentActivity
         setContentView(R.layout.activity_chat);
         mContactID = getIntent().getStringExtra(Common.PROFILE_ID);
         currentsMarkers = new HashMap<String, Marker>();
+        mSendButton = (ImageButton) findViewById(R.id.sendBtn);
+        mMsgEdit = (EditText) findViewById(R.id.msgEdit);
 
 
         Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, mContactID), null, null, null, null);
@@ -83,15 +97,29 @@ public class ChatActivity  extends FragmentActivity
 
         setUpMapIfNeeded();
 
-        mMap.setOnMapLongClickListener( new GoogleMap.OnMapLongClickListener() {
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
 
+                mLastLatLng = latLng;
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLastLatLng, 20.0f));
+                RelativeLayout sendRelativeLayout = (RelativeLayout) findViewById(R.id.sendLayout);
+                sendRelativeLayout.setVisibility(View.VISIBLE);
+                mSendButton.requestFocus();
 
-                FragmentManager fm = getSupportFragmentManager();
-                MessageDialogFragment messageDialogFragment = new MessageDialogFragment();
-                messageDialogFragment.setPosition(latLng);
-                messageDialogFragment.show(fm, "fragment_message_dialog");
+                if (mCurrentMessageMarker != null) {
+                    mCurrentMessageMarker.setVisible(false);
+                    mCurrentMessageMarker.remove();
+                }
+
+                BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+                mCurrentMessageMarker = mMap.addMarker(new MarkerOptions().position(mLastLatLng).icon(icon));
+            }
+        });
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                clearMessageEdition();
             }
         });
         
@@ -110,7 +138,37 @@ public class ChatActivity  extends FragmentActivity
             SupportMapFragment frag = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
             if (frag != null) {
                 mMap = frag.getMap();
+
+                Location location = Common.getCurrentLocation();
+                if(location != null)
+                {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+                }
+
+                mMap.setMyLocationEnabled(true);
+
+                UiSettings settings = mMap.getUiSettings();
+                settings.setAllGesturesEnabled(true);
+                settings.setMyLocationButtonEnabled(true);
+                settings.setZoomControlsEnabled(false);
             }
+        }
+    }
+
+    public void clearMessageEdition()
+    {
+        RelativeLayout sendRelativeLayout = (RelativeLayout) findViewById(R.id.sendLayout);
+        sendRelativeLayout.setVisibility(View.GONE);
+        mMsgEdit.setText("");
+        if (mCurrentMessageMarker != null) {
+            mCurrentMessageMarker.setVisible(false);
+            mCurrentMessageMarker.remove();
+            mCurrentMessageMarker = null;
+        }
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
     @Override
@@ -214,18 +272,19 @@ public class ChatActivity  extends FragmentActivity
         }
     }
 
-    public void onSendMessageClicked(final String inputText, final LatLng latLng)
+    public void onSendMessageClicked(View view)
     {
-        new AsyncTask<Void, Void, Boolean>() {
+        String text = mMsgEdit.getText().toString();
+        new AsyncTask<String, Void, Boolean>() {
             @Override
-            protected Boolean doInBackground(Void... params) {
+            protected Boolean doInBackground(String... params) {
                 try {
-                    ServerUtilities.send(latLng, inputText, mContactEmail);
+                    ServerUtilities.send(mLastLatLng, params[0], mContactEmail);
 
                     ContentValues values = new ContentValues(4);
-                    values.put(DataProvider.COL_LAT, latLng.latitude);
-                    values.put(DataProvider.COL_LON, latLng.longitude);
-                    values.put(DataProvider.COL_MSG, inputText);
+                    values.put(DataProvider.COL_LAT, mLastLatLng.latitude);
+                    values.put(DataProvider.COL_LON, mLastLatLng.longitude);
+                    values.put(DataProvider.COL_MSG, params[0]);
                     values.put(DataProvider.COL_TO, mContactEmail);
                     getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
                     return true;
@@ -240,13 +299,14 @@ public class ChatActivity  extends FragmentActivity
                     mNavigationDrawerFragment.getLoaderManager().restartLoader(0, null, mNavigationDrawerFragment);
                     populateMarkers();
                     Toast.makeText(getApplicationContext(), "Message sent", Toast.LENGTH_LONG).show();
+                    clearMessageEdition();
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "Unable to send the message", Toast.LENGTH_LONG).show();
                 }
             }
 
-            }.execute(null, null, null);
+            }.execute(text, null, null);
     }
 
 }

@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="10dp" >
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingBottom="12dp">
 
     <com.orlkuk.dropit.hmi.RoundedImageView
         android:id="@+id/avatar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="24dp"
         android:layout_alignParentLeft="true"
-        android:layout_marginRight="10dp"
         android:src="@drawable/ic_contact_picture" />
 
     <TextView
-        android:id="@+id/text1"
+        android:id="@+id/contactNameLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/avatar"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:paddingLeft="16dp"
+        android:layout_marginTop="20dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="martine" />
 
     <TextView
-        android:id="@+id/text2"
+        android:id="@+id/contactMessagesLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/text1"
+        android:layout_below="@+id/contactNameLabel"
         android:layout_toRightOf="@+id/avatar"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:paddingLeft="16dp"
+        android:layout_marginBottom="20dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="martine"/>
 
 </RelativeLayout>
